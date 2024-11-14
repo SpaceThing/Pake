@@ -1,4 +1,12 @@
 window.addEventListener('DOMContentLoaded', _event => {
+  // Custom CSS
+  const customCSS = `
+    
+  `;
+  const customStyleElement = document.createElement('style');
+  customStyleElement.innerHTML = customCSS;
+  document.head.appendChild(customStyleElement);
+  
   // Customize and transform existing functions
   const contentCSS = `
     #page #footer-wrapper,
