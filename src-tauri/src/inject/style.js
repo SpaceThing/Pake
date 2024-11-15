@@ -1,7 +1,38 @@
 window.addEventListener('DOMContentLoaded', _event => {
   // Custom CSS
   const customCSS = `
-    
+    .wr_horizontalReader .wr_horizontalReader_app_content .readerTopBar {
+      max-width: calc(100vw - 50px);
+      width: 100%;
+    }
+    .wr_horizontalReader .readerChapterContent {
+      border-radius: 0px;
+      width: 100%;
+      max-width: none;
+      height: calc(100%);
+    }
+    .wr_horizontalReader .readerControls {
+      right: 10px;
+      opacity: 0;
+    }
+    .wr_horizontalReader .readerControls:hover {
+      opacity: 1;
+    }
+    .isHorizontalReader {
+      display: none;
+    }
+    .wr_horizontalReader .readerCatalog, .wr_horizontalReader .readerNotePanel {
+      width: 360px;
+    }
+    .readerCatalog {
+      top: 0;
+      bottom: 0;
+    }
+    .reader-font-control-panel-wrapper .font-panel-content {
+      width: 360px;
+      height: 100vh;
+      max-height: none;
+    }
   `;
   const customStyleElement = document.createElement('style');
   customStyleElement.innerHTML = customCSS;
