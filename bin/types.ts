@@ -6,6 +6,9 @@ export interface PakeCliOptions {
   // Application name
   name?: string;
 
+  // Window title (supports Chinese characters)
+  title?: string;
+
   // Application icon
   icon: string;
 
@@ -21,12 +24,17 @@ export interface PakeCliOptions {
   // Whether the window can be fullscreen, default false
   fullscreen: boolean;
 
+  // Start window maximized, default false
+  maximize: boolean;
+
   // Enable immersive header, default false.
   hideTitleBar: boolean;
 
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
 
+  // App version, the same as package.json version, default 1.0.0
+  appVersion: string;
 
   // Force Mac to use dark mode, default false
   darkMode: boolean;
@@ -52,20 +60,57 @@ export interface PakeCliOptions {
   // Multi arch, supports both Intel and M1 chips, only for Mac
   multiArch: boolean;
 
-  // Package output, valid for Linux users, default is deb, optional appimage, or all (i.e., output both deb and all);
+  // Build target architecture/format:
+  // Linux: "deb", "appimage", "deb-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"
   targets: string;
 
   // Debug mode, outputs more logs
   debug: boolean;
 
-  /** 需要注入页面的外部脚本 */
+  /** External scripts that need to be injected into the page. */
   inject: string[];
 
-  /* the domain that can use ipc or tauri javascript sdk */
-  safeDomain: string[];
+  // Set Api Proxy
+  proxyUrl: string;
 
   // Installer language, valid for Windows users, default is en-US
   installerLanguage: string;
+
+  // Hide window on close instead of exiting, platform-specific: true for macOS, false for others
+  hideOnClose: boolean | undefined;
+
+  // Launch app in incognito/private mode, default false
+  incognito: boolean;
+
+  // Enable WebAssembly support (Flutter Web, etc.), default false
+  wasm: boolean;
+
+  // Enable drag and drop functionality, default false
+  enableDragDrop: boolean;
+
+  // Keep raw binary file alongside installer, default false
+  keepBinary: boolean;
+
+  // Allow multiple instances, default false (single instance)
+  multiInstance: boolean;
+
+  // Start app minimized to tray, default false
+  startToTray: boolean;
+
+  // Force navigation to stay inside the Pake window even for external links
+  forceInternalNavigation: boolean;
+
+  // Initial page zoom level (50-200), default 100
+  zoom: number;
+
+  // Minimum window width, default 0 (no limit)
+  minWidth: number;
+
+  // Minimum window height, default 0 (no limit)
+  minHeight: number;
+
+  // Ignore certificate errors (for self-signed certs), default false
+  ignoreCertificateErrors: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

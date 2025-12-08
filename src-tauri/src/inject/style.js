@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', _event => {
+window.addEventListener("DOMContentLoaded", (_event) => {
   // Customize and transform existing functions
   const contentCSS = `
     #page #footer-wrapper,
@@ -16,12 +16,12 @@ window.addEventListener('DOMContentLoaded', _event => {
     #masthead-ad,
     #app > header > div > div.menu,
     #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3),
-    #app > div.layout > div.main-container > div.side-bar > div,
     #app > div.layout > div.main-container > div.side-bar > li.divider,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance,
     #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.ChatPageFollowTwitterLink_followLink__Gl2tt,
     #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.Button_buttonBase__0QP_m.Button_primary__pIDjn.ChatPageDownloadLinks_downloadButton__amBRh,
-    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > section a[href*="/contact"] {
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > section a[href*="/contact"],
+    .dc04ec1d .c7f51894 .a1e75851, .a7f3a288 .b91228e4, .efe408db .a24007f4{
       display: none !important;
     }
 
@@ -58,6 +58,14 @@ window.addEventListener('DOMContentLoaded', _event => {
     #__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div.relative.flex.h-full.max-w-full.flex-1.overflow-hidden > div > main > div.absolute.left-2.top-2.z-10.hidden.md\\:inline-block{
       margin-top:20px;
       margin-left: 10px;
+    }
+
+    .a7f3a288.f0d4f23d {
+      padding-top: 34px;
+    }
+
+    .ec92d1d3 {
+      padding-top: 48px;
     }
 
     .chakra-ui-light #app .chakra-heading,
@@ -119,7 +127,8 @@ window.addEventListener('DOMContentLoaded', _event => {
       display: none !important;
     }
 
-    #react-root [data-testid="DMDrawer"] {
+    #react-root [data-testid="DMDrawer"],
+    #root > main > footer.justify-center.ease-in {
       visibility: hidden !important;
     }
 
@@ -274,8 +283,23 @@ window.addEventListener('DOMContentLoaded', _event => {
       margin: 0;
       display: inline;
     }
+
+    .AppHeader .AppHeader-globalBar.js-global-bar {
+      padding-top: 35px;
+    }
+
+    .header-overlay .header-logged-out {
+      margin-top: 15px;
+    }
+
+    .w-full #stage-slideover-sidebar {
+      padding-top: 16px;
+    }
+    .w-full #thread #page-header {
+      padding-top: 36px;
+    }
   `;
-  const contentStyleElement = document.createElement('style');
+  const contentStyleElement = document.createElement("style");
   contentStyleElement.innerHTML = contentCSS;
   document.head.appendChild(contentStyleElement);
 
@@ -294,8 +318,12 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top: 12px;
     }
 
-    #__next header.HeaderBar_header__jn5ju{
+    #__next header.HeaderBar_header__jn5ju {
       padding-top: 16px;
+    }
+
+    #root > .excalidraw-app> .excalidraw-container .App-menu.App-menu_top{
+      margin-top: 15px;
     }
 
     .geist-page nav.dashboard_nav__PRmJv,
@@ -332,6 +360,18 @@ window.addEventListener('DOMContentLoaded', _event => {
 
     #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
       padding-top: 20px;
+    }
+
+    .h-dvh.flex-grow .bg-gradient-to-b.from-background.via-background {
+      padding-top: 40px;
+    }
+
+    body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.z-\\[21\\].flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary.max-md\\:\\!w-0 > div > div > div > nav > div.flex.justify-between.h-\\[60px\\].items-center.md\\:h-header-height {
+      padding-top: 25px;
+    }
+
+    body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.composer-parent.flex.h-full.flex-col.focus-visible\\:outline-0 > div.flex-1.overflow-hidden.\\@container\\/thread > div > div.absolute.left-0.right-0 > div{
+      padding-top: 35px;
     }
 
     #__next .sticky.left-0.right-0.top-0.z-20.bg-black{
@@ -375,8 +415,16 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top:15px;
     }
 
+    #app-root .mat-mdc-tooltip-trigger.main-menu-button.mdc-icon-button {
+      margin-top: 15px;
+    }
+
     .lark > .main-wrapper [data-testid="aside"] {
       top: 15px;
+    }
+
+    #global > div.header-container > .mask-paper {
+      padding-top: 20px;
     }
 
     #background.ytd-masthead {
@@ -415,9 +463,9 @@ window.addEventListener('DOMContentLoaded', _event => {
       }
     }
   `;
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-  if (window['pakeConfig']?.hide_title_bar && isMac) {
-    const topPaddingStyleElement = document.createElement('style');
+  const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+  if (window["pakeConfig"]?.hide_title_bar && isMac) {
+    const topPaddingStyleElement = document.createElement("style");
     topPaddingStyleElement.innerHTML = topPaddingCSS;
     document.head.appendChild(topPaddingStyleElement);
   }
