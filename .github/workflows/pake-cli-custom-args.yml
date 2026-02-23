@@ -10,7 +10,7 @@ on:
       platform:
         description: "Platform"
         required: true
-        default: "macos-latest"
+        default: "windows-latest"
         type: choice
         options:
           - "windows-latest"
@@ -19,41 +19,48 @@ on:
       url:
         description: "Website URL"
         required: true
+        default: ""
       name:
-        description: "App name (lowercase for Linux)"
+        description: "Package Name (Required. English only)"
         required: true
+        default: ""
+      name_zh:
+        description: "Display Name (Optional. Chinese allowed)"
+        required: false
+        default: ""
       icon:
-        description: "Icon URL, auto-fetch if empty"
+        description: "Icon URL (Auto-fetch if empty)"
         required: false
+        default: ""
       width:
-        description: "Window width (px)"
+        description: "Window Width (px)"
         required: false
-        default: "1200"
+        default: "1600"
       height:
-        description: "Window height (px)"
+        description: "Window Height (px)"
         required: false
-        default: "780"
+        default: "900"
       fullscreen:
-        description: "Start in fullscreen mode"
+        description: "Start in Fullscreen Mode"
         required: false
         type: boolean
         default: false
       hide_title_bar:
-        description: "Hide title bar (macOS only)"
+        description: "Hide Title Bar (MacOS only)"
         required: false
         type: boolean
         default: false
       multi_arch:
-        description: "Universal binary (macOS only)"
+        description: "Universal Binary (MacOS only)"
         required: false
         type: boolean
         default: false
       targets:
-        description: "Package formats (comma-separated: deb,appimage,rpm)"
+        description: "Package Formats (Comma-separated: deb,appimage,rpm)"
         required: false
         default: "deb"
       extra_args:
-        description: "Extra arguments for Pake CLI (e.g. --transparent --no-menu)"
+        description: "Extra Arguments"
         required: false
         default: ""
 
@@ -102,30 +109,35 @@ jobs:
         timeout-minutes: 25
         shell: bash
         run: |
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
+          BUILD_NAME="${{ inputs.name_zh || inputs.name }}"
+          ARGS=("${{ inputs.url }}" "--name" "$BUILD_NAME")
+
+          if [ -n "${{ inputs.name_zh }}" ]; then
+            ARGS+=("--installer-language" "zh-CN")
+          fi
 
           if [ -n "${{ inputs.icon }}" ]; then
-            ARGS+=("--icon" "${{ inputs.icon }}")
+            ARGS+=("--icon" "${{ inputs.icon }}");
           fi
 
           if [ -n "${{ inputs.width }}" ]; then
-            ARGS+=("--width" "${{ inputs.width }}")
+            ARGS+=("--width" "${{ inputs.width }}");
           fi
 
           if [ -n "${{ inputs.height }}" ]; then
-            ARGS+=("--height" "${{ inputs.height }}")
+            ARGS+=("--height" "${{ inputs.height }}");
           fi
 
-          if [ "${{ inputs.fullscreen }}" == "true" ]; then
-            ARGS+=("--fullscreen")
+          if [ "${{ inputs.fullscreen }}" == "true" ];
+            then ARGS+=("--fullscreen");
           fi
 
           if [ "${{ inputs.hide_title_bar }}" == "true" ]; then
-            ARGS+=("--hide-title-bar")
+            ARGS+=("--hide-title-bar");
           fi
 
           if [ "${{ inputs.multi_arch }}" == "true" ]; then
-            ARGS+=("--multi-arch")
+            ARGS+=("--multi-arch");
           fi
 
           if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
@@ -133,18 +145,27 @@ jobs:
           fi
 
           if [ -n "${{ inputs.extra_args }}" ]; then
-            ARGS+=( ${{ inputs.extra_args }} )
+            ARGS+=( ${{ inputs.extra_args }} );
           fi
 
           echo "Running: node dist/cli.js ${ARGS[@]}"
           node dist/cli.js "${ARGS[@]}"
+
+          mv "$BUILD_NAME.dmg" "${{ inputs.name }}.dmg" 2>/dev/null || true
+          mv "$BUILD_NAME.deb" "${{ inputs.name }}.deb" 2>/dev/null || true
+          mv "$BUILD_NAME.AppImage" "${{ inputs.name }}.AppImage" 2>/dev/null || true
 
       - name: Build App (Windows)
         if: runner.os == 'Windows'
         timeout-minutes: 25
         shell: pwsh
         run: |
-          $args = @("${{ inputs.url }}", "--name", "${{ inputs.name }}")
+          $buildName = if ("${{ inputs.name_zh }}" -ne "") { "${{ inputs.name_zh }}" } else { "${{ inputs.name }}" }
+          $args = @("${{ inputs.url }}", "--name", "$buildName")
+
+          if ("${{ inputs.name_zh }}" -ne "") {
+            $args += "--installer-language", "zh-CN"
+          }
 
           if ("${{ inputs.icon }}" -ne "") {
             $args += "--icon", "${{ inputs.icon }}"
@@ -173,6 +194,10 @@ jobs:
 
           Write-Host "Running: node dist/cli.js $($args -join ' ')"
           node dist/cli.js $args
+
+          if (Test-Path "$buildName.msi") {
+            Move-Item "$buildName.msi" "${{ inputs.name }}.msi" -Force
+          }
 
           git checkout -- src-tauri/Cargo.lock
 
