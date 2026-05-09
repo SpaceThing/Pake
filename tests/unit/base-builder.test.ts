@@ -182,4 +182,28 @@ describe('BaseBuilder guards', () => {
     expect(builder).toBeInstanceOf(BaseBuilder);
     expect(builder.getFileName()).toBe('test-app');
   });
+
+  it('builds with generated .pake config and cli-build feature', () => {
+    const builder = new TestBuilder({
+      debug: false,
+      targets: 'deb',
+    } as any);
+
+    const command = (builder as any).getBuildCommand('pnpm');
+
+    expect(command).toContain('src-tauri/.pake/tauri.conf.json');
+    expect(command).toContain('--features cli-build');
+  });
+
+  it('tracks generated Pake config files in the Cargo build script', async () => {
+    const buildScript = await fsExtra.readFile(
+      path.join(process.cwd(), 'src-tauri', 'build.rs'),
+      'utf8',
+    );
+
+    expect(buildScript).toContain('cargo:rerun-if-changed=.pake/pake.json');
+    expect(buildScript).toContain(
+      'cargo:rerun-if-changed=.pake/tauri.conf.json',
+    );
+  });
 });
