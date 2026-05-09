@@ -11,9 +11,29 @@ use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 use tauri::Theme;
 
 static BADGE_COUNT: AtomicI64 = AtomicI64::new(0);
+const MAX_BADGE_COUNT: i64 = 99_999;
+const MAX_BADGE_LABEL_CHARS: usize = 16;
+
+fn normalize_badge_count(count: Option<i64>) -> Option<i64> {
+    count.filter(|n| (1..=MAX_BADGE_COUNT).contains(n))
+}
+
+fn normalize_badge_label(label: Option<&str>) -> Result<Option<String>, String> {
+    let Some(label) = label.map(str::trim).filter(|label| !label.is_empty()) else {
+        return Ok(None);
+    };
+
+    if label.chars().count() > MAX_BADGE_LABEL_CHARS {
+        return Err(format!(
+            "Badge label must be {MAX_BADGE_LABEL_CHARS} characters or fewer"
+        ));
+    }
+
+    Ok(Some(label.to_string()))
+}
 
 fn apply_badge(app: &AppHandle, count: Option<i64>) -> Result<(), String> {
-    let label = count.filter(|n| *n > 0).map(|n| n.to_string());
+    let label = normalize_badge_count(count).map(|n| n.to_string());
     apply_badge_label(app, label.as_deref())
 }
 
@@ -178,19 +198,22 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
         .icon(&params.icon)
         .show()
         .map_err(|e| format!("Failed to show notification: {}", e))?;
-
-    let next = BADGE_COUNT.fetch_add(1, Ordering::SeqCst) + 1;
-    if let Err(error) = apply_badge(&app, Some(next)) {
-        eprintln!("[Pake] Failed to update dock badge: {error}");
-    }
     Ok(())
 }
 
 #[command]
 pub fn set_dock_badge(app: AppHandle, count: Option<i64>) -> Result<(), String> {
-    let normalized = count.filter(|n| *n > 0);
+    let normalized = normalize_badge_count(count);
     BADGE_COUNT.store(normalized.unwrap_or(0), Ordering::SeqCst);
     apply_badge(&app, normalized)
+}
+
+#[command]
+pub fn increment_dock_badge(app: AppHandle) -> Result<(), String> {
+    let current = BADGE_COUNT.load(Ordering::SeqCst);
+    let next = current.saturating_add(1).clamp(1, MAX_BADGE_COUNT);
+    BADGE_COUNT.store(next, Ordering::SeqCst);
+    apply_badge(&app, Some(next))
 }
 
 #[command]
@@ -202,7 +225,8 @@ pub fn clear_dock_badge(app: AppHandle) -> Result<(), String> {
 #[command]
 pub fn set_dock_badge_label(app: AppHandle, label: Option<String>) -> Result<(), String> {
     BADGE_COUNT.store(0, Ordering::SeqCst);
-    apply_badge_label(&app, label.as_deref().filter(|s| !s.is_empty()))
+    let label = normalize_badge_label(label.as_deref())?;
+    apply_badge_label(&app, label.as_deref())
 }
 
 #[command]

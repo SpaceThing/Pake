@@ -1042,14 +1042,28 @@ document.addEventListener("DOMContentLoaded", () => {
   let pageManagedBadge = false;
   let autoBadgeActive = false;
 
+  const normalizeBadgeCount = (count) => {
+    if (typeof count !== "number" || !Number.isFinite(count)) {
+      throw new TypeError("Badge count must be a finite number.");
+    }
+    const normalized = Math.floor(count);
+    return normalized > 0 ? Math.min(normalized, 99999) : null;
+  };
   const setBadge = (count) => {
     pageManagedBadge = true;
+    autoBadgeActive = false;
     return invoke("set_dock_badge", { count }).catch(() => {});
   };
   const clearBadge = () => invoke("clear_dock_badge").catch(() => {});
   const setLabel = (label) => {
     pageManagedBadge = true;
+    autoBadgeActive = false;
     return invoke("set_dock_badge_label", { label }).catch(() => {});
+  };
+  const incrementAutoBadge = () => {
+    if (pageManagedBadge) return Promise.resolve();
+    autoBadgeActive = true;
+    return invoke("increment_dock_badge").catch(() => {});
   };
 
   window.addEventListener("focus", () => {
@@ -1084,11 +1098,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     lastNotifTime = Date.now();
     lastNotif = notif;
-    autoBadgeActive = true;
-
-    invoke("send_notification", { params: { title, body, icon } }).then(() => {
-      if (notif.onshow) notif.onshow(new Event("show"));
-    });
+    invoke("send_notification", { params: { title, body, icon } })
+      .then(() => incrementAutoBadge())
+      .then(() => {
+        if (notif.onshow) notif.onshow(new Event("show"));
+      });
 
     return notif;
   };
@@ -1115,8 +1129,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // shows the count (0 clears). clearAppBadge() removes the badge entirely.
   const setAppBadge = (count) => {
     if (count === undefined) return setLabel("•");
-    const n = typeof count === "number" && count > 0 ? Math.floor(count) : null;
-    return n === null ? clearBadge() : setBadge(n);
+    let normalized;
+    try {
+      normalized = normalizeBadgeCount(count);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (normalized === null) {
+      pageManagedBadge = false;
+      autoBadgeActive = false;
+      return clearBadge();
+    }
+    return setBadge(normalized);
   };
   const clearAppBadge = () => {
     pageManagedBadge = false;
@@ -1135,33 +1159,6 @@ document.addEventListener("DOMContentLoaded", () => {
       value: clearAppBadge,
     });
   } catch (_) {}
-
-  // Service worker notifications: forward to the same Rust command so badge
-  // bookkeeping stays consistent. Fall through to the original implementation
-  // (if any) so push subscriptions still work.
-  if (typeof ServiceWorkerRegistration !== "undefined") {
-    try {
-      const orig = ServiceWorkerRegistration.prototype.showNotification;
-      ServiceWorkerRegistration.prototype.showNotification = function (
-        title,
-        options,
-      ) {
-        const body = options?.body || "";
-        let icon = options?.icon || "";
-        if (icon.startsWith("/")) icon = window.location.origin + icon;
-        autoBadgeActive = true;
-        invoke("send_notification", { params: { title, body, icon } }).catch(
-          () => {},
-        );
-        if (orig) {
-          try {
-            return orig.call(this, title, options);
-          } catch (_) {}
-        }
-        return Promise.resolve();
-      };
-    } catch (_) {}
-  }
 })();
 
 function setDefaultZoom() {
