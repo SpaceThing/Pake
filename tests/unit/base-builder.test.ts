@@ -190,8 +190,9 @@ describe('BaseBuilder guards', () => {
     } as any);
 
     const command = (builder as any).getBuildCommand('pnpm');
+    const normalizedCommand = command.replace(/\\/g, '/');
 
-    expect(command).toContain('src-tauri/.pake/tauri.conf.json');
+    expect(normalizedCommand).toContain('src-tauri/.pake/tauri.conf.json');
     expect(command).toContain('--features cli-build');
   });
 
